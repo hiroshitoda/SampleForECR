@@ -34,6 +34,7 @@ jobs:
   deploy_image_to_service:
     executor: container-manager
     steps:
+      - setup_remote_docker
       - aws-ecs/update-service:
            family: "sample-repo-task"
            cluster-name: "sample-repo-cluster"
