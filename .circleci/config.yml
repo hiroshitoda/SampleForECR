@@ -1,16 +1,35 @@
-# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
 version: 2.1
-
-# Use a package of configuration called an orb, see https://circleci.com/docs/2.0/orb-intro/
 orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.3.1
-
-# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
+  aws-ecr: circleci/aws-ecr@4.0.1
+  aws-ecs: circleci/aws-ecs@0.0.8
 workflows:
-  # Name the workflow "Welcome"
-  Welcome:
-    # Run the welcome/run job in its own container
+  BuildContainer:
     jobs:
-      - welcome/run
-
+      - build-and-register-container
+      
+jobs:
+  build-and-register-container:
+    working_directory: /home/circleci/project
+    steps:
+      - aws-ecr/build_and_push_image:
+        checkout: true
+        create-repo: true
+        dockerfile: repo/Dockerfile
+        extra-build-args: "--build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg BRANCH_NAME=${CIRCLE_BRANCH} --build-arg SETTINGS_NAME=magic_pod.settings_development --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} --build-arg BUCKET_URL=${CREDENTIALS_BUCKET_URL}"
+        account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+        repo: "${AWS_RESOURCE_NAME_PREFIX}"
+        region: ${AWS_DEFAULT_REGION}
+        tag: "${CIRCLE_SHA1}"
+#      - aws-ecs/deploy-service-update:
+#        requires:
+#          - aws-ecr/build_and_push_image
+#        aws-region: ${AWS_DEFAULT_REGION}
+#        family: "${AWS_RESOURCE_NAME_PREFIX}-service"
+#        cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
+#        container-image-name-updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}"
+#      - aws-ecs/update-service:
+#          family: "${AWS_RESOURCE_NAME_PREFIX}-service"
+#          cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
+#          container-image-name-updates: "container=${AWS_RESOURCE_NAME_PREFIX}-service,image-and-tag=${FULL_IMAGE_NAME}"
+#          container-env-var-updates: "container=${ECS_SERVICE_NAME},name=VERSION_INFO,value=${CIRCLE_SHA1}_${CIRCLE_BUILD_NUM},container=${ECS_SERVICE_NAME},name=BUILD_DATE,value=\"$(date)\""
+#          verify-revision-is-deployed: true
