@@ -11,6 +11,7 @@ jobs:
     docker:
       - image: circleci/python:3-stretch
     steps:
+      - setup_remote_docker
       - aws-ecr/build-and-push-image:
           checkout: true
           create-repo: true
