@@ -1,7 +1,9 @@
-FROM ubuntu:18.04
+FROM python:3-slim-stretch
 
-ENV HUGA=${HOGE}HUGA
+EXPOSE 8000
 
-RUN echo ${HOGE} ${HUGA}
+WORKDIR /var/www/sample
 
-CMD ["tail", "-f", "/dev/null"]
+RUN date > index.html
+
+CMD ["/bin/sh", "-c", "cd /var/www/sample && python -m http.server"]
