@@ -7,10 +7,7 @@ orbs:
 workflows:
   build_and_deploy_image:
     jobs:
-      - build_and_push_image
-      - deploy_image_to_service:
-          requires: 
-            - build_and_push_image
+      - build_and_deploy_image
 
 executors:
   container-manager:
@@ -18,7 +15,7 @@ executors:
       - image: circleci/python:3-stretch
 
 jobs:
-  build_and_push_image:
+  build_and_deploy_image:
     executor: container-manager
     steps:
       - setup_remote_docker
@@ -31,10 +28,6 @@ jobs:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: AWS_DEFAULT_REGION
           tag: "latest"  
-  deploy_image_to_service:
-    executor: container-manager
-    steps:
-      - setup_remote_docker
       - aws-ecs/update-service:
            family: "sample-repo-task"
            cluster-name: "sample-repo-cluster"
