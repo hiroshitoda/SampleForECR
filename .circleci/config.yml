@@ -3,11 +3,14 @@ orbs:
   aws-ecr: circleci/aws-ecr@4.0.1
   aws-ecs: circleci/aws-ecs@0.0.8
 workflows:
-  build_and_push_image:
-    jobs:
-      - build_and_deploy_image
-jobs:
   build_and_deploy_image:
+    jobs:
+      - build_and_push_image
+      - deploy_image_to_service:
+          requires: 
+            - build_and_push_image
+jobs:
+  build_and_push_image:
     docker:
       - image: circleci/python:3-stretch
     steps:
@@ -20,16 +23,25 @@ jobs:
           account-url: AWS_ECR_ACCOUNT_URL
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: AWS_DEFAULT_REGION
-          tag: "latest"
+          tag: "latest"  
+  deploy_image_to_service:
+    docker:
+      - image: circleci/python:3-stretch
+    steps:
+      - aws-ecs/update-service:
+           family: "sample-repo-task"
+           cluster-name: "sample-repo-cluster"
+           service-name: "sample-repo-service"
+           container-image-name-updates: "container=sample-repo,tag=latest"
 #jobs:
 #  build_and_push_image:
 #      - aws-ecs/deploy-service-update:
-#        requires:
-#          - aws-ecr/build_and_push_image
 #        aws-region: ${AWS_DEFAULT_REGION}
 #        family: "${AWS_RESOURCE_NAME_PREFIX}-service"
 #        cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
 #        container-image-name-updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}"
+
+
 #      - aws-ecs/update-service:
 #          family: "${AWS_RESOURCE_NAME_PREFIX}-service"
 #          cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
