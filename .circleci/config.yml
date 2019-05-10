@@ -3,23 +3,19 @@ orbs:
   aws-ecr: circleci/aws-ecr@4.0.1
   aws-ecs: circleci/aws-ecs@0.0.8
 workflows:
-  BuildContainer:
+  build_and_push_image:
     jobs:
-      - build-and-register-container
-      
-jobs:
-  build-and-register-container:
-    working_directory: /home/circleci/project
-    steps:
       - aws-ecr/build_and_push_image:
-        checkout: true
-        create-repo: true
-        dockerfile: repo/Dockerfile
-        extra-build-args: "--build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg BRANCH_NAME=${CIRCLE_BRANCH} --build-arg SETTINGS_NAME=magic_pod.settings_development --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} --build-arg BUCKET_URL=${CREDENTIALS_BUCKET_URL}"
-        account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-        repo: "${AWS_RESOURCE_NAME_PREFIX}"
-        region: ${AWS_DEFAULT_REGION}
-        tag: "${CIRCLE_SHA1}"
+          checkout: true
+          create-repo: true
+          dockerfile: repo/Dockerfile
+          extra-build-args: "--build-arg GITHUB_USER=${GITHUB_USER} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg BRANCH_NAME=${CIRCLE_BRANCH} --build-arg SETTINGS_NAME=magic_pod.settings_development --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} --build-arg BUCKET_URL=${CREDENTIALS_BUCKET_URL}"
+          account-url: AWS_ECR_ACCOUNT_URL
+          repo: "${AWS_RESOURCE_NAME_PREFIX}"
+          region: AWS_DEFAULT_REGION
+          tag: "${CIRCLE_SHA1}"      
+#jobs:
+#  build-and-register-container:
 #      - aws-ecs/deploy-service-update:
 #        requires:
 #          - aws-ecr/build_and_push_image
