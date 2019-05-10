@@ -13,7 +13,7 @@ workflows:
           account-url: AWS_ECR_ACCOUNT_URL
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: AWS_DEFAULT_REGION
-          tag: "${CIRCLE_SHA1} latest"
+          tag: "latest"
 #jobs:
 #  build-and-register-container:
 #      - aws-ecs/deploy-service-update:
