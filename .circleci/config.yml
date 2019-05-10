@@ -11,10 +11,10 @@ workflows:
             - build_and_push_image
 jobs:
   build_and_push_image:
-#    docker:
-#      - image: circleci/python:3-stretch
+    docker:
+      - image: circleci/python:3-stretch
     steps:
-#      - setup_remote_docker
+      - setup_remote_docker
       - aws-ecr/build-and-push-image:
           checkout: true
           create-repo: true
@@ -25,8 +25,8 @@ jobs:
           region: AWS_DEFAULT_REGION
           tag: "latest"  
   deploy_image_to_service:
-#    docker:
-#      - image: circleci/python:3-stretch
+    docker:
+      - image: circleci/python:3-stretch
     steps:
       - aws-ecs/update-service:
            family: "sample-repo-task"
